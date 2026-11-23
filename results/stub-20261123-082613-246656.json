@@ -1,0 +1,96 @@
+{
+  "meta": {
+    "os": "Windows-10-10.0.26200-SP0",
+    "kernel": "10",
+    "python": "3.11.7",
+    "seed": 20261111,
+    "repeat": 3,
+    "data_source": "stub_example"
+  },
+  "runs": [
+    {
+      "baseline": "serial",
+      "load": "abc_stub",
+      "repeat": 1,
+      "metrics": {
+        "makespan_ms": 60,
+        "copy_count": 0,
+        "copy_bytes": 0,
+        "peak_rss_mb": 0,
+        "sched_overhead_pct": 0,
+        "recovery_ms": null,
+        "affected_tasks": null
+      }
+    },
+    {
+      "baseline": "serial",
+      "load": "abc_stub",
+      "repeat": 2,
+      "metrics": {
+        "makespan_ms": 60,
+        "copy_count": 0,
+        "copy_bytes": 0,
+        "peak_rss_mb": 0,
+        "sched_overhead_pct": 0,
+        "recovery_ms": null,
+        "affected_tasks": null
+      }
+    },
+    {
+      "baseline": "serial",
+      "load": "abc_stub",
+      "repeat": 3,
+      "metrics": {
+        "makespan_ms": 60,
+        "copy_count": 0,
+        "copy_bytes": 0,
+        "peak_rss_mb": 0,
+        "sched_overhead_pct": 0,
+        "recovery_ms": null,
+        "affected_tasks": null
+      }
+    },
+    {
+      "baseline": "naive",
+      "load": "abc_stub",
+      "repeat": 1,
+      "metrics": {
+        "makespan_ms": 60,
+        "copy_count": 0,
+        "copy_bytes": 0,
+        "peak_rss_mb": 0,
+        "sched_overhead_pct": 0,
+        "recovery_ms": null,
+        "affected_tasks": null
+      }
+    },
+    {
+      "baseline": "naive",
+      "load": "abc_stub",
+      "repeat": 2,
+      "metrics": {
+        "makespan_ms": 60,
+        "copy_count": 0,
+        "copy_bytes": 0,
+        "peak_rss_mb": 0,
+        "sched_overhead_pct": 0,
+        "recovery_ms": null,
+        "affected_tasks": null
+      }
+    },
+    {
+      "baseline": "naive",
+      "load": "abc_stub",
+      "repeat": 3,
+      "metrics": {
+        "makespan_ms": 60,
+        "copy_count": 0,
+        "copy_bytes": 0,
+        "peak_rss_mb": 0,
+        "sched_overhead_pct": 0,
+        "recovery_ms": null,
+        "affected_tasks": null
+      }
+    }
+  ]
+}
