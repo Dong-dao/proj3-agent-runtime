@@ -173,8 +173,8 @@ def transition(agent_id: str, to: AgentState) -> None: ...
 
 按本周规划第二节步骤 2，双方各留一句确认；陈苗苗逐条对照签名，有歧义当场改，不憋到周末。
 
-- 董博文（T1）：__________　日期：2026-11-17
-- 陈苗苗（T2）：__________　日期：__________
+- 董博文（T1）：契约①按本文件冻结，字段可加语义不可改，变更走第 7 节记录。　日期：2026-11-17
+- 陈苗苗（T2）：已逐条核对五组签名，全部可实现，无歧义；`next()` 不改 Agent 状态、单一写入者、seq 决定论三条前置约定已落实到 runtime/ 事件循环。实现落位：Task/TaskGraph 在 graph.py，HandleKind/ResourceHandle/错误码在 handle.py，transition() 在 agent.py。　日期：2026-11-24
 
 ---
 
