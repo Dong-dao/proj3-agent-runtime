@@ -1,0 +1,11 @@
+# requirements.lock —— 依赖锁定（T2 陈苗苗，2026-11-24 生成）
+# 运行时依赖：无（Python 3.11+ 标准库，红线：不引入其他第三方库）
+# 开发/测试依赖：pytest（唯一运行时第三方依赖，设计文档 5.1 节）
+# 重建：python -m venv .venv && source .venv/bin/activate && pip install -r requirements.lock
+# 注：绘图用 matplotlib 由 T3 实验侧自行追加，不进 Runtime
+colorama==0.4.6
+iniconfig==2.3.1
+packaging==26.4
+pluggy==1.7.0
+Pygments==2.21.0
+pytest==9.2.0
