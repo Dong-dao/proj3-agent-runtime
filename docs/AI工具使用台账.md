@@ -6,6 +6,7 @@
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 2026-11-20 | 董博文 | （待填） | S1 设计文档起草（状态机/调度依据/资源边界） | （待填） | （待填） | （待填） | 本人逐条 review 后定稿 |
 | 2026-11-23 | 栾诗童 | OpenAI Codex（GPT-6.2 Sol Light） | T3 契约②字段表 | 根据七项指标清单整理 results.json 字段表草稿 | 待确认（我再改一下） | 待确认（我再改一下） | Codex 提供初稿，本人对照清单核对并补充待确认事项。提交 14624c6 |
+| 2026-11-24 | 陈苗苗 | WorkBuddy Agent（Claude） | T2 Runtime 实现（七模块骨架 / agent.py 六态状态机 / resource.py 句柄 / graph.py DAG / scheduler.py v1+v2 / 44 例单测 / bench.py 接入真实 runtime） | 按契约①第 1-5 节签名实现七模块；transition() 单一入口与 6x6 矩阵逐格对齐 docs/design/六态状态机与合法转换矩阵.md；v2 排序键 (eligible, vd, seq) 按契约①第 5 节；单测覆盖 illegal_transition 与 cycle 两条验收命令 | 约 90% | 约 10% | 状态机矩阵与排序键语义由 T1 契约①/设计文档给定，本人逐条核对签名可实现性并留确认记录（docs/contracts/interface.md 第 6 节）；单测结果与首轮对比数据（serial=60ms，fifo=50ms）本人复核后提交。哈希见 S1 提交记录 |
 | 2026-11-23 | 栾诗童 | OpenAI Codex（GPT-6.2 Sol Light） | T3 首轮 stub 脚本 | 提供模拟任务示例和 Python 脚本，生成 JSON 并绘制对比图 | 待确认（我再改一下）| 待确认（我再改一下） | Codex 提供示例和脚本初稿，本人运行并检查 JSON 和图片。提交 89e6222、78446f4 |
 
 填写规则：
