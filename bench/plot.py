@@ -1,4 +1,11 @@
-"""读取 S1 模拟测验结果，绘制总完成时间对比图。"""
+"""读取测验结果，绘制总完成时间对比图。
+
+S1 先用 stub 数据验证 JSON 到图表的流程。
+项目基线包括 serial、naive 和 runtime。
+当前脚本默认绘制 serial 与 naive，图例使用 naive (FIFO)。
+S1 的 stub 图只用于流程验证，不能作为性能结论。
+接入真实 Runtime 结果后，再将 runtime 纳入正式对比图。
+"""
 
 import argparse
 import json
