@@ -60,6 +60,7 @@ class Scheduler:
         workers: int = 2,
         table: AgentTable | None = None,
         resources: ResourceManager | None = None,
+        fault_domain=None,
     ) -> None:
         if policy not in _VALID_POLICIES:
             raise ValueError(f"policy 只支持 {_VALID_POLICIES}，收到 {policy!r}")
@@ -71,6 +72,10 @@ class Scheduler:
         self.table = table if table is not None else AgentTable()
         self.resources = resources if resources is not None else ResourceManager()
         self.table.bind_resources(self.resources)
+        # S2 故障域（域外控制面持有引用；注入/熔断只作用于域内成员）
+        self.fault_domain = fault_domain
+        # S2 控制指令：被 Observer pause 的 Agent 暂停派发（调度器继续推进）
+        self._paused: set[str] = set()
 
         self._seq = 0
         self._seq_of: dict[str, int] = {}       # task_id -> 提交序号（决定论兜底）
@@ -136,7 +141,11 @@ class Scheduler:
 
     def _do_next(self) -> Task | None:
         self._refresh_ready()
-        candidates = [tid for tid in self._ready if tid not in self._dispatched]
+        candidates = [
+            tid for tid in self._ready
+            if tid not in self._dispatched
+            and self.graph.nodes[tid].agent_id not in self._paused  # pause 指令生效点
+        ]
         if not candidates:
             return None
         best_tid = min(candidates, key=self._sort_key)
@@ -222,7 +231,11 @@ class Scheduler:
                  task_id, task.agent_id, max(wait, 0.0), self._sim_now)
 
     def on_fail(self, task_id: str, reason: str) -> None:
-        """任务失败：RUNNING -> FAILED（终态），故障域处理在 S2 接管。"""
+        """任务失败：RUNNING -> FAILED（终态），并向故障域记账（S2 机制③）。
+
+        F2 单一入口：失败只经本方法 transition，无直接状态赋值；
+        F5 计数：故障时刻与受影响下游任务在此登记。
+        """
         self._timed(self._do_on_fail, task_id, reason)
 
     def _do_on_fail(self, task_id: str, reason: str) -> None:
@@ -232,6 +245,43 @@ class Scheduler:
         log.warning("fail %s (agent=%s): %s", task_id, task.agent_id, reason)
         self.table.transition(task.agent_id, AgentState.FAILED)
         self._done.add(task_id)
+        if self.fault_domain is not None:
+            self.fault_domain.record_failure(task.agent_id, reason, self._sim_now)
+            downstream = self._collect_downstream(task_id)
+            self.fault_domain.mark_downstream(downstream)
+            if downstream:
+                log.info(
+                    "fault domain: %s 的下游 %s 登记为受影响任务",
+                    task_id, sorted(downstream),
+                )
+
+    def _collect_downstream(self, task_id: str) -> set[str]:
+        """传递闭包：task_id 的全部未完成下游任务（受影响任务登记用）。"""
+        seen: set[str] = set()
+        frontier = [task_id]
+        while frontier:
+            cur = frontier.pop()
+            for dep_tid in self.graph.dependents(cur):
+                if dep_tid not in seen and dep_tid not in self._done:
+                    seen.add(dep_tid)
+                    frontier.append(dep_tid)
+        return seen
+
+    # ---- 控制指令（Observer pause/resume 的落地，S2 机制⑤） ---------------------
+    def pause_agent(self, agent_id: str) -> None:
+        """暂停派发该 Agent 的任务（任务留在就绪队列，调度器继续推进）。"""
+        self.table.get(agent_id)  # 校验存在
+        self._paused.add(agent_id)
+        log.info("control pause %s: 该 Agent 任务暂停派发", agent_id)
+
+    def resume_agent(self, agent_id: str) -> None:
+        """恢复派发该 Agent 的任务。"""
+        self._paused.discard(agent_id)
+        log.info("control resume %s: 恢复派发", agent_id)
+
+    def is_paused(self, agent_id: str) -> bool:
+        """查询 Agent 是否被暂停派发。"""
+        return agent_id in self._paused
 
     # ---- 事件循环（单一写入者） -----------------------------------------------
     def run(self, stub, executor: ThreadPoolExecutor | None = None) -> dict:
@@ -253,15 +303,41 @@ class Scheduler:
                     task = self.next()
                     if task is None:
                         break
+                    # S2 故障口径：FAILED 终态 Agent 的后续任务不再派发，
+                    # 登记受影响并摘除（其余 Agent 任务继续推进，F3）
+                    agent_state = self.table.get(task.agent_id).state
+                    if agent_state == AgentState.FAILED:
+                        log.warning(
+                            "skip %s: agent %s 已 FAILED（故障域内终态），"
+                            "登记受影响任务",
+                            task.task_id, task.agent_id,
+                        )
+                        self._dispatched.add(task.task_id)
+                        self._done.add(task.task_id)
+                        if self.fault_domain is not None:
+                            self.fault_domain.mark_affected(task.task_id)
+                        continue
                     handle_id = self.dispatch(task)
-                    if handle_id is not None:
-                        future = executor.submit(stub.run, f"{task.task_id}:{task.slice_ms}")
-                        finish = self._sim_now + task.slice_ms
-                        heapq.heappush(inflight, (finish, order, task.task_id, future))
-                        order += 1
-                    else:
+                    if handle_id is None:
                         # 配额拒绝：READY -> FAILED 已发生，本轮继续取下一个
                         continue
+                    # S2 注入/熔断判定：命中则不执行 stub，直接走 on_fail 单一入口
+                    if (
+                        self.fault_domain is not None
+                        and (self.fault_domain.should_fail(task)
+                             or self.fault_domain.is_broken(task.agent_id))
+                    ):
+                        reason = (
+                            f"breaker open: {task.agent_id}"
+                            if self.fault_domain.is_broken(task.agent_id)
+                            else self.fault_domain.fail_reason(task)
+                        )
+                        self.on_fail(task.task_id, reason)
+                        continue
+                    future = executor.submit(stub.run, f"{task.task_id}:{task.slice_ms}")
+                    finish = self._sim_now + task.slice_ms
+                    heapq.heappush(inflight, (finish, order, task.task_id, future))
+                    order += 1
                 if not inflight:
                     if self._pending:
                         raise RuntimeError(
@@ -272,7 +348,12 @@ class Scheduler:
                 # 推进模拟时钟到最早完成事件，消费结果（单写入者）
                 finish, _, task_id, future = heapq.heappop(inflight)
                 self._sim_now = finish
-                result = future.result()
+                try:
+                    result = future.result()
+                except Exception as exc:  # noqa: BLE001 —— stub 异常即故障，隔离在域内
+                    # F2/F3：单 Agent 失败走单一入口，调度器继续推进其余任务
+                    self.on_fail(task_id, f"stub raised: {exc!r}")
+                    continue
                 self.on_complete(task_id, result)
         finally:
             if own_executor:
@@ -301,6 +382,10 @@ class Scheduler:
             elif agent.state == AgentState.TERMINATED:
                 # 同一 Agent 的上一个任务已完成：S1 简化口径下不再复用状态
                 log.debug("agent %s 已终态，任务 %s 仍按就绪记账", agent.agent_id, tid)
+        # F5 恢复时间采集：受影响任务重新就绪的时刻（只记第一次）
+        if newly_ready and self.fault_domain is not None:
+            if any(self.fault_domain.is_affected(tid) for tid in newly_ready):
+                self.fault_domain.mark_recovered(self._sim_now)
 
     def _timed(self, fn, *args):
         """调度器自身耗时计量（sched_overhead_pct 的采集点）。"""
