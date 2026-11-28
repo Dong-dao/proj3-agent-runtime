@@ -18,6 +18,8 @@ from __future__ import annotations
 import logging
 import time
 
+from .handle import RuntimeErr
+
 log = logging.getLogger("runtime.observer")
 
 

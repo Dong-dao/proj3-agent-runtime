@@ -29,7 +29,7 @@ import time
 from collections import deque
 from dataclasses import dataclass
 
-from .handle import E_BAD_HANDLE, RuntimeErr
+from .handle import E_BAD_HANDLE, E_PERM, RuntimeErr
 
 log = logging.getLogger("runtime.bus")
 
@@ -106,15 +106,17 @@ class MessageBus:
             self._recv_count += 1
             if self._context is not None:
                 # 接收方 acquire 语义：显式登记共享（refs +1），与 release 成对（M5）；
-                # 接收方已持有时幂等跳过（同一 ctx 的多条消息不重复计数 refs）
+                # 已持有（E_BAD_HANDLE）幂等跳过——同一 ctx 多条消息不重复计数 refs；
+                # 跨域共享被拒（E_PERM）只拒登记不拒投递：消息按引用送达，
+                # 接收方后续 read 仍会被隔离域校验拦下（未登记即隔离）
                 try:
                     self._context.grant(msg.sender, msg.ctx_ref, receiver)
                 except RuntimeErr as exc:
-                    if exc.code != E_BAD_HANDLE:
+                    if exc.code not in (E_BAD_HANDLE, E_PERM):
                         raise
-                    log.debug(
-                        "recv %s: %s 已持有 %s，幂等跳过登记",
-                        msg.msg_id, receiver, msg.ctx_ref,
+                    log.info(
+                        "recv %s: %s 对 %s 的共享登记被拒（%s），消息按引用送达",
+                        msg.msg_id, receiver, msg.ctx_ref, exc.code,
                     )
             log.info(
                 "recv %s by %s (sender=%s, ctx_ref=%s)",
