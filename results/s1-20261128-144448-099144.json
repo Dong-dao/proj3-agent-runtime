@@ -1,0 +1,239 @@
+{
+  "meta": {
+    "os": "Windows-11-10.0.26200-SP0",
+    "kernel": "11",
+    "python": "3.13.14",
+    "seed": 20261111,
+    "repeat": 3,
+    "data_source": "runtime_v1_v2_real",
+    "load_source": "bench/scenario.py TASKS",
+    "note": "调度开销为真实 CPU/墙钟占比（S1 占位口径）；峰值内存用 tracemalloc"
+  },
+  "runs": [
+    {
+      "baseline": "serial",
+      "load": "s1_abc_stub",
+      "repeat": 1,
+      "metrics": {
+        "makespan_ms": 60.0,
+        "copy_count": 0,
+        "copy_bytes": 0,
+        "peak_rss_mb": 0.013,
+        "sched_overhead_pct": 22.217,
+        "recovery_ms": null,
+        "affected_tasks": null
+      },
+      "detail": {
+        "policy": "fifo",
+        "workers": 1,
+        "waiting_ms_total": 50.0,
+        "ready_len": 0,
+        "deadline_miss": 0,
+        "transitions": 9,
+        "illegal_intercepts": 0,
+        "reclaimed_handles": 3,
+        "note": ""
+      }
+    },
+    {
+      "baseline": "serial",
+      "load": "s1_abc_stub",
+      "repeat": 2,
+      "metrics": {
+        "makespan_ms": 60.0,
+        "copy_count": 0,
+        "copy_bytes": 0,
+        "peak_rss_mb": 0.012,
+        "sched_overhead_pct": 31.74,
+        "recovery_ms": null,
+        "affected_tasks": null
+      },
+      "detail": {
+        "policy": "fifo",
+        "workers": 1,
+        "waiting_ms_total": 50.0,
+        "ready_len": 0,
+        "deadline_miss": 0,
+        "transitions": 9,
+        "illegal_intercepts": 0,
+        "reclaimed_handles": 3,
+        "note": ""
+      }
+    },
+    {
+      "baseline": "serial",
+      "load": "s1_abc_stub",
+      "repeat": 3,
+      "metrics": {
+        "makespan_ms": 60.0,
+        "copy_count": 0,
+        "copy_bytes": 0,
+        "peak_rss_mb": 0.012,
+        "sched_overhead_pct": 30.73,
+        "recovery_ms": null,
+        "affected_tasks": null
+      },
+      "detail": {
+        "policy": "fifo",
+        "workers": 1,
+        "waiting_ms_total": 50.0,
+        "ready_len": 0,
+        "deadline_miss": 0,
+        "transitions": 9,
+        "illegal_intercepts": 0,
+        "reclaimed_handles": 3,
+        "note": ""
+      }
+    },
+    {
+      "baseline": "fifo",
+      "load": "s1_abc_stub",
+      "repeat": 1,
+      "metrics": {
+        "makespan_ms": 50.0,
+        "copy_count": 0,
+        "copy_bytes": 0,
+        "peak_rss_mb": 0.011,
+        "sched_overhead_pct": 35.072,
+        "recovery_ms": null,
+        "affected_tasks": null
+      },
+      "detail": {
+        "policy": "fifo",
+        "workers": 3,
+        "waiting_ms_total": 0.0,
+        "ready_len": 0,
+        "deadline_miss": 0,
+        "transitions": 9,
+        "illegal_intercepts": 0,
+        "reclaimed_handles": 3,
+        "note": ""
+      }
+    },
+    {
+      "baseline": "fifo",
+      "load": "s1_abc_stub",
+      "repeat": 2,
+      "metrics": {
+        "makespan_ms": 50.0,
+        "copy_count": 0,
+        "copy_bytes": 0,
+        "peak_rss_mb": 0.012,
+        "sched_overhead_pct": 33.046,
+        "recovery_ms": null,
+        "affected_tasks": null
+      },
+      "detail": {
+        "policy": "fifo",
+        "workers": 3,
+        "waiting_ms_total": 0.0,
+        "ready_len": 0,
+        "deadline_miss": 0,
+        "transitions": 9,
+        "illegal_intercepts": 0,
+        "reclaimed_handles": 3,
+        "note": ""
+      }
+    },
+    {
+      "baseline": "fifo",
+      "load": "s1_abc_stub",
+      "repeat": 3,
+      "metrics": {
+        "makespan_ms": 50.0,
+        "copy_count": 0,
+        "copy_bytes": 0,
+        "peak_rss_mb": 0.012,
+        "sched_overhead_pct": 25.144,
+        "recovery_ms": null,
+        "affected_tasks": null
+      },
+      "detail": {
+        "policy": "fifo",
+        "workers": 3,
+        "waiting_ms_total": 0.0,
+        "ready_len": 0,
+        "deadline_miss": 0,
+        "transitions": 9,
+        "illegal_intercepts": 0,
+        "reclaimed_handles": 3,
+        "note": ""
+      }
+    },
+    {
+      "baseline": "runtime",
+      "load": "s1_abc_stub",
+      "repeat": 1,
+      "metrics": {
+        "makespan_ms": 50.0,
+        "copy_count": 0,
+        "copy_bytes": 0,
+        "peak_rss_mb": 0.012,
+        "sched_overhead_pct": 29.196,
+        "recovery_ms": null,
+        "affected_tasks": null
+      },
+      "detail": {
+        "policy": "vd",
+        "workers": 3,
+        "waiting_ms_total": 0.0,
+        "ready_len": 0,
+        "deadline_miss": 0,
+        "transitions": 9,
+        "illegal_intercepts": 0,
+        "reclaimed_handles": 3,
+        "note": ""
+      }
+    },
+    {
+      "baseline": "runtime",
+      "load": "s1_abc_stub",
+      "repeat": 2,
+      "metrics": {
+        "makespan_ms": 50.0,
+        "copy_count": 0,
+        "copy_bytes": 0,
+        "peak_rss_mb": 0.011,
+        "sched_overhead_pct": 32.635,
+        "recovery_ms": null,
+        "affected_tasks": null
+      },
+      "detail": {
+        "policy": "vd",
+        "workers": 3,
+        "waiting_ms_total": 0.0,
+        "ready_len": 0,
+        "deadline_miss": 0,
+        "transitions": 9,
+        "illegal_intercepts": 0,
+        "reclaimed_handles": 3,
+        "note": ""
+      }
+    },
+    {
+      "baseline": "runtime",
+      "load": "s1_abc_stub",
+      "repeat": 3,
+      "metrics": {
+        "makespan_ms": 50.0,
+        "copy_count": 0,
+        "copy_bytes": 0,
+        "peak_rss_mb": 0.011,
+        "sched_overhead_pct": 33.496,
+        "recovery_ms": null,
+        "affected_tasks": null
+      },
+      "detail": {
+        "policy": "vd",
+        "workers": 3,
+        "waiting_ms_total": 0.0,
+        "ready_len": 0,
+        "deadline_miss": 0,
+        "transitions": 9,
+        "illegal_intercepts": 0,
+        "reclaimed_handles": 3,
+        "note": ""
+      }
+    }
+  ]
+}
